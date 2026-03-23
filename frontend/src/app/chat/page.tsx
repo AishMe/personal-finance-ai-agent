@@ -68,7 +68,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-full bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b px-6 py-4 flex items-center gap-3">
         <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
