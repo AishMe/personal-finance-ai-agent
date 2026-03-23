@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
+import { supabase } from "@/lib/supabase";
 
 type Message = {
   role: "user" | "assistant";
@@ -12,7 +13,7 @@ export default function ChatPage() {
     {
       role: "assistant",
       content:
-        "Hi! I'm your personal finance assistant. Ask me anything about budgeting, saving, or your expenses.",
+        "Hi! I'm FinanceAI, your personal finance assistant. I can see your transactions and profile. Ask me anything — like 'How much did I spend this month?' or 'Am I on track with my savings goal?'",
     },
   ]);
   const [input, setInput] = useState("");
@@ -33,11 +34,18 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
+      // Get the logged-in user's ID
+      const { data: { user } } = await supabase.auth.getUser();
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/chat/`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            // Send user ID so the AI gets personalized context
+            ...(user ? { "user-id": user.id } : {}),
+          },
           body: JSON.stringify({ messages: updatedMessages }),
         }
       );
@@ -76,7 +84,9 @@ export default function ChatPage() {
         </div>
         <div>
           <h1 className="font-semibold text-gray-800">FinanceAI</h1>
-          <p className="text-xs text-gray-400">Your personal finance assistant</p>
+          <p className="text-xs text-gray-400">
+            Personalized to your financial data
+          </p>
         </div>
       </div>
 
