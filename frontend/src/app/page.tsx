@@ -1,73 +1,138 @@
+"use client";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import {
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-  PiggyBank,
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
+} from "recharts";
+import {
+  TrendingUp, TrendingDown, Wallet, PiggyBank, ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 
-const summaryCards = [
-  {
-    label: "Monthly Income",
-    value: "₹50,000",
-    change: "+0%",
-    positive: true,
-    icon: TrendingUp,
-    color: "bg-green-50 text-green-600",
-  },
-  {
-    label: "Total Expenses",
-    value: "₹32,400",
-    change: "-8% vs last month",
-    positive: true,
-    icon: TrendingDown,
-    color: "bg-red-50 text-red-600",
-  },
-  {
-    label: "Remaining Balance",
-    value: "₹17,600",
-    change: "35% of income",
-    positive: true,
-    icon: Wallet,
-    color: "bg-blue-50 text-blue-600",
-  },
-  {
-    label: "Savings Goal",
-    value: "₹10,000",
-    change: "76% achieved",
-    positive: true,
-    icon: PiggyBank,
-    color: "bg-purple-50 text-purple-600",
-  },
-];
+const PIE_COLORS = ["#6366f1","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316","#84cc16"];
 
-const recentTransactions = [
-  { name: "Grocery store",   category: "Food",          amount: "-₹1,200", date: "Today",     color: "bg-orange-100 text-orange-700" },
-  { name: "Salary credit",   category: "Income",        amount: "+₹50,000", date: "Mar 1",    color: "bg-green-100 text-green-700"  },
-  { name: "Netflix",         category: "Subscription",  amount: "-₹649",   date: "Feb 28",    color: "bg-red-100 text-red-700"      },
-  { name: "Electricity bill",category: "Utilities",     amount: "-₹1,800", date: "Feb 27",    color: "bg-yellow-100 text-yellow-700"},
-  { name: "Freelance work",  category: "Income",        amount: "+₹8,000", date: "Feb 25",    color: "bg-green-100 text-green-700"  },
-];
+type Summary = {
+  monthly_income: number;
+  total_expenses: number;
+  balance: number;
+  savings_goal: number;
+  savings_rate: number;
+  currency: string;
+};
+
+type CategoryItem = { name: string; value: number };
+type TrendItem = { month: string; income: number; expense: number };
+type Transaction = {
+  id: string; type: string; amount: number;
+  category: string; description: string; date: string;
+};
+
+type DashboardData = {
+  summary: Summary;
+  category_breakdown: CategoryItem[];
+  monthly_trend: TrendItem[];
+  recent_transactions: Transaction[];
+};
 
 export default function DashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/dashboard/summary`,
+          { headers: { "user-id": user.id } }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch dashboard data");
+        const json = await res.json();
+        setData(json);
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboard();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center h-full">
+        <div className="text-gray-400 text-sm">Loading your dashboard...</div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 text-red-600 rounded-xl p-4 text-sm">
+          {error || "Could not load dashboard. Make sure your backend is running."}
+        </div>
+      </div>
+    );
+  }
+
+  const { summary, category_breakdown, monthly_trend, recent_transactions } = data;
+  const cur = summary.currency === "INR" ? "₹" : summary.currency;
+
+  const summaryCards = [
+    {
+      label: "Monthly Income",
+      value: `${cur}${summary.monthly_income.toLocaleString()}`,
+      sub: "This month",
+      icon: TrendingUp,
+      color: "bg-green-50 text-green-600",
+    },
+    {
+      label: "Total Expenses",
+      value: `${cur}${summary.total_expenses.toLocaleString()}`,
+      sub: `${((summary.total_expenses / summary.monthly_income) * 100).toFixed(0)}% of income`,
+      icon: TrendingDown,
+      color: "bg-red-50 text-red-600",
+    },
+    {
+      label: "Remaining Balance",
+      value: `${cur}${summary.balance.toLocaleString()}`,
+      sub: `${summary.savings_rate}% savings rate`,
+      icon: Wallet,
+      color: "bg-blue-50 text-blue-600",
+    },
+    {
+      label: "Savings Goal",
+      value: `${cur}${summary.savings_goal.toLocaleString()}`,
+      sub: summary.balance >= summary.savings_goal ? "On track!" : "Not yet reached",
+      icon: PiggyBank,
+      color: summary.balance >= summary.savings_goal
+        ? "bg-purple-50 text-purple-600"
+        : "bg-orange-50 text-orange-600",
+    },
+  ];
+
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header */}
-      <div className="mb-8">
+      <div>
         <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Welcome back — here is your financial snapshot for March 2026.
+          Your financial snapshot for {new Date().toLocaleString("default", { month: "long", year: "numeric" })}
         </p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-4 mb-8 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div
-              key={card.label}
-              className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm"
-            >
+            <div key={card.label} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs text-gray-500 font-medium">{card.label}</p>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${card.color}`}>
@@ -75,36 +140,143 @@ export default function DashboardPage() {
                 </div>
               </div>
               <p className="text-xl font-semibold text-gray-800">{card.value}</p>
-              <p className="text-xs text-gray-400 mt-1">{card.change}</p>
+              <p className="text-xs text-gray-400 mt-1">{card.sub}</p>
             </div>
           );
         })}
       </div>
 
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+        {/* Pie Chart — Category Breakdown */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <h2 className="font-semibold text-gray-800 mb-4">Spending by category</h2>
+          {category_breakdown.length === 0 ? (
+            <div className="h-48 flex items-center justify-center text-gray-400 text-sm">
+              No expenses yet this month
+            </div>
+          ) : (
+            <>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={category_breakdown}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {category_breakdown.map((_, index) => (
+                      <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value: number) => [`${cur}${value.toLocaleString()}`, ""]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Legend */}
+              <div className="mt-3 grid grid-cols-2 gap-1">
+                {category_breakdown.map((item, i) => (
+                  <div key={item.name} className="flex items-center gap-2 text-xs text-gray-600">
+                    <div
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
+                    />
+                    <span className="truncate">{item.name}</span>
+                    <span className="ml-auto font-medium text-gray-800">
+                      {cur}{item.value.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Bar Chart — Monthly Trend */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <h2 className="font-semibold text-gray-800 mb-4">Income vs expenses trend</h2>
+          {monthly_trend.length === 0 ? (
+            <div className="h-48 flex items-center justify-center text-gray-400 text-sm">
+              No data yet
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={monthly_trend} barSize={18} barGap={4}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 11, fill: "#94a3b8" }}
+                  tickFormatter={(v) => v.slice(5)}
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "#94a3b8" }}
+                  tickFormatter={(v) => `${cur}${(v / 1000).toFixed(0)}k`}
+                />
+                <Tooltip
+                  formatter={(value: number) => [`${cur}${value.toLocaleString()}`, ""]}
+                />
+                <Legend
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{ fontSize: 12 }}
+                />
+                <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} name="Income" />
+                <Bar dataKey="expense" fill="#6366f1" radius={[4, 4, 0, 0]} name="Expenses" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
       {/* Recent Transactions */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="font-semibold text-gray-800">Recent Transactions</h2>
-          <a href="/transactions" className="text-indigo-600 text-sm hover:underline">
-            View all
-          </a>
+          <h2 className="font-semibold text-gray-800">Recent transactions</h2>
+          <Link
+            href="/transactions"
+            className="text-indigo-600 text-sm hover:underline flex items-center gap-1"
+          >
+            View all <ArrowRight size={14} />
+          </Link>
         </div>
-        <div className="divide-y divide-gray-50">
-          {recentTransactions.map((tx) => (
-            <div key={tx.name} className="px-6 py-4 flex items-center gap-4">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold ${tx.color}`}>
-                {tx.category[0]}
+        {recent_transactions.length === 0 ? (
+          <div className="p-8 text-center text-gray-400 text-sm">
+            No transactions yet.{" "}
+            <Link href="/transactions" className="text-indigo-600 hover:underline">
+              Add your first one
+            </Link>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-50">
+            {recent_transactions.map((tx) => (
+              <div key={tx.id} className="px-6 py-4 flex items-center gap-4">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold ${
+                  tx.type === "income"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-indigo-100 text-indigo-700"
+                }`}>
+                  {tx.category?.[0] ?? "?"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">
+                    {tx.description || tx.category}
+                  </p>
+                  <p className="text-xs text-gray-400">{tx.category} · {tx.date}</p>
+                </div>
+                <p className={`text-sm font-semibold ${
+                  tx.type === "income" ? "text-green-600" : "text-gray-800"
+                }`}>
+                  {tx.type === "income" ? "+" : "-"}{cur}{tx.amount.toLocaleString()}
+                </p>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">{tx.name}</p>
-                <p className="text-xs text-gray-400">{tx.category} · {tx.date}</p>
-              </div>
-              <p className={`text-sm font-semibold ${tx.amount.startsWith("+") ? "text-green-600" : "text-gray-800"}`}>
-                {tx.amount}
-              </p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
