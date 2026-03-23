@@ -4,6 +4,7 @@ from routes.chat import router as chat_router
 from routes.transactions import router as transactions_router
 from routes.profile import router as profile_router
 from routes.dashboard import router as dashboard_router
+from routes.insights import router as insights_router
 
 app = FastAPI(title="Finance Agent API")
 
@@ -19,6 +20,7 @@ app.include_router(chat_router)
 app.include_router(transactions_router)
 app.include_router(profile_router)
 app.include_router(dashboard_router)
+app.include_router(insights_router)
 
 @app.get("/")
 def root():

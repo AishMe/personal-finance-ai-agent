@@ -56,6 +56,11 @@ export default function Sidebar() {
             >
               <Icon size={18} />
               {label}
+              {label === "Insights" && (
+                <span className="ml-auto text-xs bg-indigo-100 text-indigo-600 font-medium px-1.5 py-0.5 rounded-full">
+                  AI
+                </span>
+              )}
             </Link>
           );
         })}
