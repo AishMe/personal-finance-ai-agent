@@ -76,7 +76,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col h-full bg-zinc-900">
       {/* Header */}
       <div className="bg-white border-b px-6 py-4 flex items-center gap-3">
         <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
@@ -101,7 +101,7 @@ export default function ChatPage() {
               className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                 msg.role === "user"
                   ? "bg-indigo-600 text-white rounded-br-sm"
-                  : "bg-white text-gray-800 shadow-sm border rounded-bl-sm"
+                  : "bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700 rounded-bl-sm"
               }`}
             >
               {msg.role === "assistant" ? (
@@ -128,7 +128,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input */}
-      <div className="bg-white border-t px-4 py-4">
+      <div className="bg-zinc-900 border-t border-zinc-700 px-4 py-4">
         <div className="flex gap-3 max-w-3xl mx-auto">
           <textarea
             value={input}
@@ -136,7 +136,7 @@ export default function ChatPage() {
             onKeyDown={handleKeyDown}
             placeholder="Ask about your finances... (Enter to send)"
             rows={1}
-            className="flex-1 resize-none border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
+            className="flex-1 resize-none border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-100 bg-zinc-800"
           />
           <button
             onClick={sendMessage}

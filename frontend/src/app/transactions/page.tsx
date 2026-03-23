@@ -94,7 +94,7 @@ export default function TransactionsPage() {
 
       {/* Add Form */}
       {showForm && (
-        <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6 shadow-sm">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-5 mb-6 shadow-sm">
           <h2 className="font-semibold text-gray-800 mb-4">New transaction</h2>
 
           {/* Type toggle */}
@@ -124,7 +124,7 @@ export default function TransactionsPage() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-zinc-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-zinc-700 text-zinc-100"
               />
             </div>
             <div>
@@ -182,7 +182,7 @@ export default function TransactionsPage() {
       )}
 
       {/* Transactions List */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <div className="bg-zinc-800 rounded-2xl border border-zinc-700 shadow-sm">
         {loading ? (
           <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
         ) : transactions.length === 0 ? (
@@ -192,7 +192,7 @@ export default function TransactionsPage() {
         ) : (
           <div className="divide-y divide-gray-50">
             {transactions.map((tx) => (
-              <div key={tx.id} className="px-5 py-4 flex items-center gap-4 group">
+              <div key={tx.id} className="px-5 py-4 flex items-center gap-4 group hover:bg-zinc-700/50 transition-colors">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold ${
                   tx.type === "income"
                     ? "bg-green-100 text-green-700"
@@ -201,10 +201,10 @@ export default function TransactionsPage() {
                   {tx.category[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">
+                  <p className="text-sm font-medium text-zinc-100 truncate">
                     {tx.description || tx.category}
                   </p>
-                  <p className="text-xs text-gray-400">{tx.category} · {tx.date}</p>
+                  <p className="text-xs text-zinc-400">{tx.category} · {tx.date}</p>
                 </div>
                 <p className={`text-sm font-semibold ${
                   tx.type === "income" ? "text-green-600" : "text-gray-800"
