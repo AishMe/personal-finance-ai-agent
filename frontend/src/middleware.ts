@@ -21,15 +21,15 @@ export async function middleware(request: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
+  const path = request.nextUrl.pathname;
 
-  // Redirect unauthenticated users to login
-  if (!user && request.nextUrl.pathname !== "/login") {
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (path === "/login") {
+    if (user) return NextResponse.redirect(new URL("/", request.url));
+    return response;
   }
 
-  // Redirect logged-in users away from login page
-  if (user && request.nextUrl.pathname === "/login") {
-    return NextResponse.redirect(new URL("/", request.url));
+  if (!user) {
+    return response;
   }
 
   return response;

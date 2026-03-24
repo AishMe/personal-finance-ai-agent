@@ -9,81 +9,80 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleAuth = async () => {
-  setLoading(true);
-  setError("");
+    setLoading(true);
+    setError("");
+    const { error } = isSignUp
+      ? await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signInWithPassword({ email, password });
+    if (error) setError(error.message);
+    else { router.push("/"); router.refresh(); }
+    setLoading(false);
+  };
 
-  console.log("Attempting auth with:", email);
-  console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-
-  const { data, error } = isSignUp
-    ? await supabase.auth.signUp({ email, password })
-    : await supabase.auth.signInWithPassword({ email, password });
-
-  console.log("Auth result:", { data, error });
-
-  if (error) {
-    setError(error.message);
-  } else {
+  const handleDemo = async () => {
+    setDemoLoading(true);
+    // Store demo user ID in sessionStorage
+    // so all API calls use demo data
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/demo/user-id`);
+    const data = await res.json();
+    sessionStorage.setItem("demo_user_id", data.user_id);
+    sessionStorage.setItem("is_demo", "true");
     router.push("/");
-    router.refresh();
-  }
-  setLoading(false);
-};
+    setDemoLoading(false);
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-sm bg-white rounded-2xl p-8 border border-gray-100 shadow-xl">
+
         {/* Logo */}
-        <div className="flex items-center gap-2 mb-8">
-          <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold">F</span>
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold">
+            F
           </div>
           <div>
-            <p className="font-semibold text-gray-800">FinanceAI</p>
-            <p className="text-xs text-gray-400">Personal assistant</p>
+            <p className="font-semibold text-sm text-gray-800">FinanceAI</p>
+            <p className="text-xs text-gray-400">Personal finance assistant</p>
           </div>
         </div>
 
-        <h1 className="text-xl font-semibold text-gray-800 mb-1">
+        <h1 className="text-xl font-bold text-gray-800 mb-1">
           {isSignUp ? "Create account" : "Welcome back"}
         </h1>
-        <p className="text-sm text-gray-500 mb-6">
-          {isSignUp ? "Start managing your finances" : "Sign in to your account"}
+        <p className="text-sm text-gray-400 mb-6">
+          {isSignUp ? "Start managing your finances smarter" : "Sign in to continue"}
         </p>
 
         {error && (
-          <div className="bg-red-50 text-red-600 text-sm rounded-lg px-4 py-3 mb-4">
+          <div className="text-sm rounded-xl px-4 py-3 mb-4 bg-red-50 text-red-500">
             {error}
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">
-              Email
-            </label>
+            <label className="text-xs font-medium text-gray-500 block mb-1.5">Email</label>
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl px-4 py-2.5 text-sm border border-gray-200 text-gray-800 placeholder:text-gray-300 outline-none focus:border-indigo-400 transition-colors"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">
-              Password
-            </label>
+            <label className="text-xs font-medium text-gray-500 block mb-1.5">Password</label>
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              onKeyDown={(e) => e.key === "Enter" && handleAuth()}
+              onKeyDown={e => e.key === "Enter" && handleAuth()}
+              className="w-full rounded-xl px-4 py-2.5 text-sm border border-gray-200 text-gray-800 placeholder:text-gray-300 outline-none focus:border-indigo-400 transition-colors"
             />
           </div>
         </div>
@@ -91,16 +90,32 @@ export default function LoginPage() {
         <button
           onClick={handleAuth}
           disabled={loading || !email || !password}
-          className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white py-2.5 rounded-xl text-sm font-medium transition-colors"
+          className="w-full mt-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 transition-colors"
         >
           {loading ? "Please wait..." : isSignUp ? "Create account" : "Sign in"}
         </button>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        {/* Divider */}
+        <div className="flex items-center gap-3 my-4">
+          <div className="flex-1 h-px bg-gray-100" />
+          <span className="text-xs text-gray-400">or</span>
+          <div className="flex-1 h-px bg-gray-100" />
+        </div>
+
+        {/* Demo button */}
+        <button
+          onClick={handleDemo}
+          disabled={demoLoading}
+          className="w-full py-2.5 rounded-xl text-sm font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-40 transition-colors border border-indigo-100"
+        >
+          {demoLoading ? "Loading demo..." : "Try Demo — no signup needed"}
+        </button>
+
+        <p className="text-center text-sm text-gray-400 mt-4">
           {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
           <button
             onClick={() => { setIsSignUp(!isSignUp); setError(""); }}
-            className="text-indigo-600 hover:underline font-medium"
+            className="text-indigo-600 hover:text-indigo-500 font-medium transition-colors"
           >
             {isSignUp ? "Sign in" : "Sign up"}
           </button>

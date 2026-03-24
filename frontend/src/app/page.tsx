@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { getUserId } from "@/lib/user";
 import { supabase } from "@/lib/supabase";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
@@ -43,12 +44,12 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        const userId = await getUserId();
+        if (!userId) return;
 
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/dashboard/summary`,
-          { headers: { "user-id": user.id } }
+          { headers: { "user-id": userId } }
         );
 
         if (!res.ok) throw new Error("Failed to fetch dashboard data");

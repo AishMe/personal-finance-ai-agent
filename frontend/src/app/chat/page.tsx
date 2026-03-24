@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/lib/supabase";
+import { getUserId } from "@/lib/user";
 
 type Message = {
   role: "user" | "assistant";
@@ -35,7 +36,7 @@ export default function ChatPage() {
 
     try {
       // Get the logged-in user's ID
-      const { data: { user } } = await supabase.auth.getUser();
+      const userId = await getUserId();
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/chat/`,
@@ -44,7 +45,7 @@ export default function ChatPage() {
           headers: {
             "Content-Type": "application/json",
             // Send user ID so the AI gets personalized context
-            ...(user ? { "user-id": user.id } : {}),
+            ...(userId ? { "user-id": userId } : {}),
           },
           body: JSON.stringify({ messages: updatedMessages }),
         }

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Plus, Trash2 } from "lucide-react";
+import { getUserId } from "@/lib/user";
 
 type Transaction = {
   id: string;
@@ -29,12 +30,12 @@ export default function TransactionsPage() {
   const [saving, setSaving] = useState(false);
 
   const fetchTransactions = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const userId = await getUserId();
+    if (!userId) return;
 
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/transactions/`,
-      { headers: { "user-id": user.id } }
+      { headers: { "user-id": userId } }
     );
     const data = await res.json();
     setTransactions(data);
@@ -46,14 +47,14 @@ export default function TransactionsPage() {
   const handleAdd = async () => {
     if (!amount || isNaN(Number(amount))) return;
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const userId = await getUserId();
+    if (!userId) return;
 
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "user-id": user.id,
+        "user-id": userId,
       },
       body: JSON.stringify({ type, amount: Number(amount), category, description, date: txDate }),
     });
@@ -66,11 +67,11 @@ export default function TransactionsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const userId = await getUserId();
+    if (!userId) return;
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${id}`, {
       method: "DELETE",
-      headers: { "user-id": user.id },
+      headers: { "user-id": userId },
     });
     setTransactions((prev) => prev.filter((t) => t.id !== id));
   };

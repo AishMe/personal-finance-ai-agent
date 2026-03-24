@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { getUserId } from "@/lib/user";
 import {
   CheckCircle, AlertTriangle, Info, Lightbulb, RefreshCw,
 } from "lucide-react";
@@ -66,12 +67,12 @@ export default function InsightsPage() {
     else setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const userId = await getUserId();
+      if (!userId) return;
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/insights/`,
-        { headers: { "user-id": user.id } }
+        { headers: { "user-id": userId } }
       );
 
       const data = await res.json();

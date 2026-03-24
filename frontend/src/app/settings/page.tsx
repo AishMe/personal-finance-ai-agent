@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { getUserId } from "@/lib/user";
 
 export default function SettingsPage() {
   const [name, setName] = useState("");
@@ -12,11 +13,11 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const userId = await getUserId();
+      if (!userId) return;
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/profile/`,
-        { headers: { "user-id": user.id } }
+        { headers: { "user-id": userId } }
       );
       const data = await res.json();
       setName(data.name || "");
@@ -29,8 +30,8 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const userId = await getUserId();
+    if (!userId) return;
 
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/profile/`, {
       method: "PUT",
