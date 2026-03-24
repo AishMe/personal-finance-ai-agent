@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getUserId } from "@/lib/user";
 import { supabase } from "@/lib/supabase";
 import {
@@ -41,17 +42,20 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const router = useRouter(); 
+
   useEffect(() => {
     const fetchDashboard = async () => {
+      const userId = await getUserId();
+      if (!userId) {
+        router.push("/login");
+        return;
+      }
       try {
-        const userId = await getUserId();
-        if (!userId) return;
-
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/dashboard/summary`,
           { headers: { "user-id": userId } }
         );
-
         if (!res.ok) throw new Error("Failed to fetch dashboard data");
         const json = await res.json();
         setData(json);

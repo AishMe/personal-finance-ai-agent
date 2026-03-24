@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import { getUserId } from "@/lib/user";
 import {
   CheckCircle, AlertTriangle, Info, Lightbulb, RefreshCw,
@@ -62,24 +63,28 @@ export default function InsightsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [message, setMessage] = useState("");
 
+  const router = useRouter();
+
   const fetchInsights = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
 
-    try {
-      const userId = await getUserId();
-      if (!userId) return;
+    const userId = await getUserId();
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
 
+    try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/insights/`,
         { headers: { "user-id": userId } }
       );
-
       const data = await res.json();
       setInsights(data.insights || []);
       setMessage(data.message || "");
     } catch (e) {
-      setMessage("Failed to load insights. Make sure your backend is running.");
+      setMessage("Failed to load insights.");
     } finally {
       setLoading(false);
       setRefreshing(false);

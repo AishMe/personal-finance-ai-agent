@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import { getUserId } from "@/lib/user";
 
 export default function SettingsPage() {
@@ -11,10 +12,15 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const router = useRouter();
+
   useEffect(() => {
     const fetchProfile = async () => {
       const userId = await getUserId();
-      if (!userId) return;
+      if (!userId) {
+        router.push("/login");
+        return;
+      }
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/profile/`,
         { headers: { "user-id": userId } }

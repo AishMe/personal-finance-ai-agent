@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { getUserId } from "@/lib/user";
 
 type Transaction = {
@@ -29,10 +30,14 @@ export default function TransactionsPage() {
   const [txDate, setTxDate] = useState(new Date().toISOString().split("T")[0]);
   const [saving, setSaving] = useState(false);
 
+  const router = useRouter(); 
+
   const fetchTransactions = async () => {
     const userId = await getUserId();
-    if (!userId) return;
-
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/transactions/`,
       { headers: { "user-id": userId } }

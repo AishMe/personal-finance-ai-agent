@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import { getUserId } from "@/lib/user";
 
 type Message = {
@@ -25,8 +26,16 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+    const router = useRouter();
+
+    const sendMessage = async () => {
+      if (!input.trim() || loading) return;
+
+    const userId = await getUserId();
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
 
     const userMessage: Message = { role: "user", content: input };
     const updatedMessages = [...messages, userMessage];

@@ -15,6 +15,11 @@ export default function LoginPage() {
   const handleAuth = async () => {
     setLoading(true);
     setError("");
+
+    // Clear any demo session before real login
+    sessionStorage.removeItem("is_demo");
+    sessionStorage.removeItem("demo_user_id");
+
     const { error } = isSignUp
       ? await supabase.auth.signUp({ email, password })
       : await supabase.auth.signInWithPassword({ email, password });

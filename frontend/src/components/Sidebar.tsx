@@ -21,6 +21,10 @@ export default function Sidebar() {
   const router = useRouter();
 
   const handleLogout = async () => {
+    // Clear demo session
+    sessionStorage.removeItem("is_demo");
+    sessionStorage.removeItem("demo_user_id");
+
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
