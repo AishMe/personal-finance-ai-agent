@@ -175,7 +175,7 @@ export default function DashboardPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) => [`${cur}${value.toLocaleString()}`, ""]}
+                    formatter={(value) => [`${cur}${Number(value).toLocaleString()}`, ""]}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -219,7 +219,7 @@ export default function DashboardPage() {
                   tickFormatter={(v) => `${cur}${(v / 1000).toFixed(0)}k`}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`${cur}${value.toLocaleString()}`, ""]}
+                  formatter={(value) => [`${cur}${Number(value).toLocaleString()}`, ""]}
                 />
                 <Legend
                   iconType="circle"

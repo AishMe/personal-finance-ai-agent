@@ -37,7 +37,7 @@ export default function SettingsPage() {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        "user-id": user.id,
+        "user-id": userId,
       },
       body: JSON.stringify({
         name,
