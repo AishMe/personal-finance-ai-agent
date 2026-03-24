@@ -127,6 +127,25 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </div>
 
+      {messages.length === 1 && (
+          <div className="flex flex-wrap gap-2 px-4 pb-2 max-w-3xl mx-auto w-full">
+            {[
+              "Analyze my budget",
+              "Help me save ₹10,000 in 3 months",
+              "How much have I spent this month?",
+              "What is 15% of my income?",
+            ].map((suggestion) => (
+              <button
+                key={suggestion}
+                onClick={() => setInput(suggestion)}
+                className="text-xs px-3 py-1.5 rounded-full border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        )}
+
       {/* Input */}
       <div className="bg-zinc-900 border-t border-zinc-700 px-4 py-4">
         <div className="flex gap-3 max-w-3xl mx-auto">
@@ -134,7 +153,7 @@ export default function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about your finances... (Enter to send)"
+            placeholder="Ask about your finances..."
             rows={1}
             className="flex-1 resize-none border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-100 bg-zinc-800"
           />

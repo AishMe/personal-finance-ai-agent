@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel
 from typing import Annotated
-from agent.llm import chat_with_ai
-from agent.prompts import build_system_prompt
+from agent.runner import run_agent
 from agent.context import build_user_context
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -23,18 +22,13 @@ async def chat(
     user_id: Annotated[str | None, Header(alias="user-id")] = None
 ):
     try:
-        # Build personalized context from user's real data
-        if user_id:
-            user_context = build_user_context(user_id)
-        else:
-            user_context = "No user data available."
-
-        system_prompt = build_system_prompt(user_context)
+        user_context = build_user_context(user_id) if user_id else "No user data."
         messages = [m.model_dump() for m in request.messages]
 
-        reply = await chat_with_ai(
+        reply = await run_agent(
             messages=messages,
-            system_prompt=system_prompt,
+            user_id=user_id or "",
+            user_context=user_context,
         )
         return ChatResponse(reply=reply)
     except Exception as e:
