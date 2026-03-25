@@ -127,3 +127,99 @@ textarea::placeholder {
 .divide-gray-50 > * + * {
   border-color: #27272a !important;
 }
+
+/* ─────────────────────────────────────────────
+   Day 11 — Quick Add Expense (Natural Language)
+   ───────────────────────────────────────────── */
+
+.quick-add-wrapper {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+
+.quick-add-input {
+  width: 100%;
+  background: #0f172a !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #475569 !important;
+  border-radius: 10px;
+  padding: 11px 36px 11px 14px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.quick-add-input:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.quick-add-input::placeholder {
+  color: #64748b !important;
+}
+
+/* Parse preview card */
+.parse-preview {
+  background: #0f172a;
+  border: 1px solid #3b82f6;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+/* Tag pills inside preview */
+.parse-tag {
+  display: inline-block;
+  background: #1e40af;
+  color: #bfdbfe;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+/* Save button */
+.quick-add-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #4f46e5;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.quick-add-save-btn:hover {
+  background: #4338ca;
+}
+
+.quick-add-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Cancel button */
+.quick-add-cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.quick-add-cancel-btn:hover {
+  background: #1e293b;
+  color: #f1f5f9;
+}

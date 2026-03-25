@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getUserId } from "@/lib/user";
-import { supabase } from "@/lib/supabase";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
@@ -11,8 +11,12 @@ import {
   TrendingUp, TrendingDown, Wallet, PiggyBank, ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import QuickAddExpense from "@/components/QuickAddExpense"; 
 
-const PIE_COLORS = ["#6366f1","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316","#84cc16"];
+const PIE_COLORS = [
+  "#6366f1","#10b981","#f59e0b","#ef4444",
+  "#8b5cf6","#06b6d4","#f97316","#84cc16",
+];
 
 type Summary = {
   monthly_income: number;
@@ -24,7 +28,7 @@ type Summary = {
 };
 
 type CategoryItem = { name: string; value: number };
-type TrendItem = { month: string; income: number; expense: number };
+type TrendItem   = { month: string; income: number; expense: number };
 type Transaction = {
   id: string; type: string; amount: number;
   category: string; description: string; date: string;
@@ -38,35 +42,33 @@ type DashboardData = {
 };
 
 export default function DashboardPage() {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [data, setData]     = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError]   = useState("");
 
-  const router = useRouter(); 
+  const router = useRouter();
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      const userId = await getUserId();
-      if (!userId) {
-        router.push("/login");
-        return;
-      }
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/dashboard/summary`,
-          { headers: { "user-id": userId } }
-        );
-        if (!res.ok) throw new Error("Failed to fetch dashboard data");
-        const json = await res.json();
-        setData(json);
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDashboard();
-  }, []);
+  const fetchDashboard = useCallback(async () => {
+    const userId = await getUserId();
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/dashboard/summary`,
+        { headers: { "user-id": userId } }
+      );
+      if (!res.ok) throw new Error("Failed to fetch dashboard data");
+      setData(await res.json());
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
+  useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
   if (loading) {
     return (
@@ -100,7 +102,7 @@ export default function DashboardPage() {
     {
       label: "Total Expenses",
       value: `${cur}${summary.total_expenses.toLocaleString()}`,
-      sub: `${((summary.total_expenses / summary.monthly_income) * 100).toFixed(0)}% of income`,
+      sub: `${((summary.total_expenses / (summary.monthly_income || 1)) * 100).toFixed(0)}% of income`,
       icon: TrendingDown,
       color: "bg-red-50 text-red-600",
     },
@@ -128,16 +130,23 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Your financial snapshot for {new Date().toLocaleString("default", { month: "long", year: "numeric" })}
+          Your financial snapshot for{" "}
+          {new Date().toLocaleString("default", { month: "long", year: "numeric" })}
         </p>
       </div>
+
+      {/* ── Natural Language Quick Add ── */}
+      <QuickAddExpense onSaved={fetchDashboard} />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+            <div
+              key={card.label}
+              className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm"
+            >
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs text-gray-500 font-medium">{card.label}</p>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${card.color}`}>
@@ -154,7 +163,7 @@ export default function DashboardPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
-        {/* Pie Chart — Category Breakdown */}
+        {/* Pie Chart */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <h2 className="font-semibold text-gray-800 mb-4">Spending by category</h2>
           {category_breakdown.length === 0 ? (
@@ -167,12 +176,9 @@ export default function DashboardPage() {
                 <PieChart>
                   <Pie
                     data={category_breakdown}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={3}
-                    dataKey="value"
+                    cx="50%" cy="50%"
+                    innerRadius={55} outerRadius={85}
+                    paddingAngle={3} dataKey="value"
                   >
                     {category_breakdown.map((_, index) => (
                       <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
@@ -183,7 +189,6 @@ export default function DashboardPage() {
                   />
                 </PieChart>
               </ResponsiveContainer>
-              {/* Legend */}
               <div className="mt-3 grid grid-cols-2 gap-1">
                 {category_breakdown.map((item, i) => (
                   <div key={item.name} className="flex items-center gap-2 text-xs text-gray-600">
@@ -202,7 +207,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Bar Chart — Monthly Trend */}
+        {/* Bar Chart */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <h2 className="font-semibold text-gray-800 mb-4">Income vs expenses trend</h2>
           {monthly_trend.length === 0 ? (
@@ -225,13 +230,9 @@ export default function DashboardPage() {
                 <Tooltip
                   formatter={(value) => [`${cur}${Number(value).toLocaleString()}`, ""]}
                 />
-                <Legend
-                  iconType="circle"
-                  iconSize={8}
-                  wrapperStyle={{ fontSize: 12 }}
-                />
-                <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} name="Income" />
-                <Bar dataKey="expense" fill="#6366f1" radius={[4, 4, 0, 0]} name="Expenses" />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
+                <Bar dataKey="income"  fill="#10b981" radius={[4,4,0,0]} name="Income" />
+                <Bar dataKey="expense" fill="#6366f1" radius={[4,4,0,0]} name="Expenses" />
               </BarChart>
             </ResponsiveContainer>
           )}
