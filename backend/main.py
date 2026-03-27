@@ -6,7 +6,9 @@ from routes.profile import router as profile_router
 from routes.dashboard import router as dashboard_router
 from routes.insights import router as insights_router
 from routes.demo import router as demo_router
-from routes.nlp import router as nlp_router  
+from routes.nlp import router as nlp_router            # Day 11
+from routes.csv_upload import router as csv_router     # Day 12
+from routes.budget_limits import router as budget_router  # Day 13
 
 app = FastAPI(title="Finance Agent API")
 
@@ -28,6 +30,8 @@ app.include_router(dashboard_router)
 app.include_router(insights_router)
 app.include_router(demo_router)
 app.include_router(nlp_router)  
+app.include_router(csv_router)   
+app.include_router(budget_router)  
 
 
 @app.get("/")

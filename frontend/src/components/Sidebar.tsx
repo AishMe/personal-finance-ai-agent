@@ -1,30 +1,33 @@
 "use client";
+// frontend/src/components/Sidebar.tsx — Day 13: Budget Limits added
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, MessageCircle, ArrowLeftRight,
   Target, Lightbulb, Settings, LogOut,
+  FileSpreadsheet, ShieldCheck,
 } from "lucide-react";
 import clsx from "clsx";
 import { supabase } from "@/lib/supabase";
 
 const navItems = [
   { label: "Dashboard",    href: "/",            icon: LayoutDashboard },
-  { label: "Chat",         href: "/chat",         icon: MessageCircle   },
+  { label: "Chat",         href: "/chat",        icon: MessageCircle   },
   { label: "Transactions", href: "/transactions", icon: ArrowLeftRight  },
-  { label: "Goals",        href: "/goals",        icon: Target          },
-  { label: "Insights",     href: "/insights",     icon: Lightbulb       },
+  { label: "Import CSV",   href: "/csv",         icon: FileSpreadsheet },  // Day 12
+  { label: "Budget",       href: "/budget",      icon: ShieldCheck     },  // Day 13
+  { label: "Goals",        href: "/goals",       icon: Target          },
+  { label: "Insights",     href: "/insights",    icon: Lightbulb       },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
+  const router   = useRouter();
 
   const handleLogout = async () => {
-    // Clear demo session
     sessionStorage.removeItem("is_demo");
     sessionStorage.removeItem("demo_user_id");
-
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
@@ -61,9 +64,7 @@ export default function Sidebar() {
               <Icon size={18} />
               {label}
               {label === "Insights" && (
-                <span className="ml-auto text-xs bg-indigo-100 text-indigo-600 font-medium px-1.5 py-0.5 rounded-full">
-                  AI
-                </span>
+                <span className="ml-auto text-xs bg-indigo-100 text-indigo-600 font-medium px-1.5 py-0.5 rounded-full">AI</span>
               )}
             </Link>
           );
@@ -71,19 +72,14 @@ export default function Sidebar() {
       </nav>
 
       <div className="px-3 py-4 border-t border-gray-100 space-y-1">
-        <Link
-          href="/settings"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-        >
-          <Settings size={18} />
-          Settings
+        <Link href="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <Settings size={18} /> Settings
         </Link>
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors"
         >
-          <LogOut size={18} />
-          Sign out
+          <LogOut size={18} /> Sign out
         </button>
       </div>
     </aside>
