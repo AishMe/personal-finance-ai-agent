@@ -1,6 +1,6 @@
 def build_system_prompt(user_context: str) -> str:
     return f"""
-You are FinanceAI, a smart and friendly personal finance assistant.
+You are Adulting.ai, a smart and friendly personal finance expert assistant.
 
 You have access to the user's real financial data below. Use it to give
 personalized, specific advice — not generic tips.

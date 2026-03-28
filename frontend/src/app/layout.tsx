@@ -1,33 +1,18 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
-import { ThemeProvider } from "@/components/ThemeProvider";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Finance Agent",
-  description: "Your personal AI finance assistant",
+  title: "Adulting.ai — Your AI Financial Copilot",
+  description: "Track spending, get AI insights, and actually understand your money.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// The root layout is intentionally minimal — it just provides
+// the HTML shell and global CSS. Each page group handles its
+// own shell (the landing page has no sidebar; app pages use AppShell).
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-zinc-900 text-zinc-100`}>
-        <ThemeProvider>
-          <div className="flex h-screen overflow-hidden bg-zinc-900">
-            <Sidebar />
-            <main className="flex-1 overflow-y-auto bg-zinc-900">
-              {children}
-            </main>
-          </div>
-        </ThemeProvider>
-      </body>
+    <html lang="en">
+      <body>{children}</body>
     </html>
   );
 }
